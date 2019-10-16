@@ -8,7 +8,6 @@ from org.apache.commons.io import IOUtils
 from java.nio.charset import StandardCharsets
 from org.apache.nifi.processor.io import StreamCallback
 
-
 def hashField(text):
   return hashlib.sha256(text.encode()).hexdigest()
 
@@ -24,16 +23,16 @@ class convertStream(StreamCallback):
                 val=new_list[3]
                 hashField=(hashlib.sha256(val.encode('utf-8')).hexdigest())
                 new_list[3]=hash_object.hexdigest()
-                
+                output.append(''.join(l))
     out='\n'.join(output)
     outputStream.write(out.encode('utf-8'))
 
 flowfile = session.get()
 if(flowfile != None):
         flowfile=session.write(flowfile,convertStream())
-        flowfile = session.putAttribute(flowfile, "INT_CDM.SAS_CI_CHANGE_LOG_001
+        flowfile = session.putAttribute(flowfile, "a6a3bfec-6024-4225-89a6-84d7e00f76a5
 ",
-flowfile.getAttribute('INT_CDM.SAS_CI_CHANGE_LOG_001
+flowfile.getAttribute('a6a3bfec-6024-4225-89a6-84d7e00f76a5
 ').split('.')[0]+'_hashed')
         session.transfer(flowfile, REL_SUCCESS)
         session.commit()
