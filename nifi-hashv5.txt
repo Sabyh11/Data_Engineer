@@ -1,0 +1,40 @@
+import datetime
+from urlparse import urlparse, parse_qs
+import sys
+import hashlib
+import java.io
+import csv
+from org.apache.commons.io import IOUtils
+from java.nio.charset import StandardCharsets
+from org.apache.nifi.processor.io import StreamCallback
+
+
+def hashField(text):
+  return hashlib.sha256(text.encode()).hexdigest()
+
+class convertStream(StreamCallback):
+  def __init__(self):
+        pass
+  def process(self,inputStream,outputStream):
+    text = IOUtils.toString(inputStream, StandardCharsets.UTF_8)
+    output=[]
+    for column in text:
+                l=','.join(column)  
+                new_list=l.split(',')
+                val=new_list[3]
+                hashField=(hashlib.sha256(val.encode('utf-8')).hexdigest())
+                new_list[3]=hash_object.hexdigest()
+                
+    out='\n'.join(output)
+    outputStream.write(out.encode('utf-8'))
+
+flowfile = session.get()
+if(flowfile != None):
+        flowfile=session.write(flowfile,convertStream())
+        flowfile = session.putAttribute(flowfile, "INT_CDM.SAS_CI_CHANGE_LOG_001
+",
+flowfile.getAttribute('INT_CDM.SAS_CI_CHANGE_LOG_001
+').split('.')[0]+'_hashed')
+        session.transfer(flowfile, REL_SUCCESS)
+        session.commit()
+
