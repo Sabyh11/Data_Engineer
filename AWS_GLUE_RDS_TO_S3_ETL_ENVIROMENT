@@ -17,21 +17,27 @@ spark = glueContext.spark_session
 job = Job(glueContext)
 sqlContext = SQLContext(spark)
 
+args = getResolvedOptions(sys.argv,
+                          ['JOB_NAME'])
 
+tablelist =''
+for table_obj in sqlContext.tables('rds-oracle-database').select("tableName").collect():
+    table=table_obj['tableName']
+    save_location= 's3://tipper-s3/'
+    outputFileName =  save_location + "/" + table
+    tablelist += ('\n-- tableName: '+table+ ",")
 
- for table_obj in sqlContext.tables('rds-oracle-database').select("tableName").collect():
-        tablename = print ('\n-- tableName: '+table_obj')
 
 
 
 response = client.start_job_run(
              JOBNAME = 'RDS_ORACLE_S3',
              Arguments = {
-               '--DB_NAME':   'rds-oracle-databas',
+               '--DB_NAME':   'rds-oracle-database',
                '--target_format':  'csv',
                '--aws_region':  'ap-southeast-1',
                '--save_location': 's3://tipper-s3/',
-               '--table_name' :  tablename,
+               '--table_name' :  tablelist,
                '--outputFileName' :  'save_location + "/" + table_name'} )
 
 
