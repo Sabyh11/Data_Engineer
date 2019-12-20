@@ -11,6 +11,14 @@ from  pyspark.sql import SparkSession
 from pyspark.sql import SQLContext
 from pyspark.sql.functions import *
 
+save_location= "s3://tipper-s3/"
+target_format = "csv"
+csvlocation = save_location+'abc.folder'
+DB_NAME = "rds-oracle-database"
+outputFileName =  csvlocation + "/" + table
+
+
+
 #table_obj=spark.sql("show databases").show()
 
 for table_obj in sqlContext.tables('rds-oracle-database').select("tableName").collect():
