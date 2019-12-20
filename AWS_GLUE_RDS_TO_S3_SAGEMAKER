@@ -1,0 +1,21 @@
+
+import sys
+from awsglue.transforms import *
+from awsglue.utils import getResolvedOptions
+from pyspark.context import SparkContext
+from awsglue.context import *
+from awsglue.job import Job
+import boto3
+import pandas as pd
+from  pyspark.sql import SparkSession
+from pyspark.sql import SQLContext
+from pyspark.sql.functions import *
+
+#table_obj=spark.sql("show databases").show()
+
+for table_obj in sqlContext.tables('rds-oracle-database').select("tableName").collect():
+    table=table_obj['tableName']
+    outputFileName =  csvlocation + "/" + table
+    datasource = glueContext.create_dynamic_frame.from_catalog(database = glue_database, table_name = table, transformation_ctx = "datasource")
+    df = datasource.toDF().repartition(1)
+    df1=df.repartition(1).write.csv(path=outputFileName, mode="append", header="true")
