@@ -30,9 +30,9 @@ response = client.start_job_run(
                '--DB_NAME':   'rds-oracle-databas',
                '--target_format':  'csv',
                '--aws_region':  'ap-southeast-1',
-               '--save_location': 's3://tipper-s3/'
-               '--outputFileName' =  'save_location + "/" + table'
-               '--table_name' =  tablename} )
+               '--save_location': 's3://tipper-s3/',
+               '--table_name' =  tablename,
+               '--outputFileName' =  'save_location + "/" + table'} )
 
 
 args = getResolvedOptions(sys.argv,
@@ -47,7 +47,7 @@ args = getResolvedOptions(sys.argv,
 job.init(args['JOB_NAME'], args)
 
 for table in table_name:
-    datasource0 = glueContext.create_dynamic_frame.from_catalog(database = DB_NAME, table_name = args['table_name', transformation_ctx = "datasource0")
+    datasource0 = glueContext.create_dynamic_frame.from_catalog(database = DB_NAME, table_name = args['table_name'], transformation_ctx = "datasource0")
     datasink4 = glueContext.write_dynamic_frame.from_options(frame = datasource0, connection_type = "s3", connection_options = {"path": "s3://tipper-s3/"+ table + "/"}, format = "parquet", transformation_ctx = "datasink4")
 
 job.comit()    
