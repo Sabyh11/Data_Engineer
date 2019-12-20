@@ -32,7 +32,7 @@ response = client.start_job_run(
                '--aws_region':  'ap-southeast-1',
                '--save_location': 's3://tipper-s3/',
                '--table_name' =  tablename,
-               '--outputFileName' =  'save_location + "/" + table'} )
+               '--outputFileName' =  'save_location + "/" + tablename'} )
 
 
 args = getResolvedOptions(sys.argv,
