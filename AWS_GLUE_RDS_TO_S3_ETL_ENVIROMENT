@@ -20,7 +20,7 @@ sqlContext = SQLContext(spark)
 
 
  for table_obj in sqlContext.tables('rds-oracle-database').select("tableName").collect():
-        tablename = print ('\n-- tableName: '+table)
+        tablename = print ('\n-- tableName: '+table_obj')
 
 
 
@@ -31,8 +31,8 @@ response = client.start_job_run(
                '--target_format':  'csv',
                '--aws_region':  'ap-southeast-1',
                '--save_location': 's3://tipper-s3/',
-               '--table_name' =  tablename,
-               '--outputFileName' =  'save_location + "/" + tablename'} )
+               '--table_name' :  tablename,
+               '--outputFileName' :  'save_location + "/" + table_name'} )
 
 
 args = getResolvedOptions(sys.argv,
