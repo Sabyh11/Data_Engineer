@@ -1,0 +1,60 @@
+
+import sys
+from awsglue.transforms import *
+from awsglue.utils import getResolvedOptions
+from pyspark.context import SparkContext
+from awsglue.context import *
+from awsglue.job import Job
+import boto3
+import pandas as pd
+from  pyspark.sql import SparkSession
+from pyspark.sql import SQLContext
+from pyspark.sql.functions import *
+import boto3
+
+aws_region = "ap-southeast-1"
+gluedatabase = "admin-mysql-databaseadmin"
+save_location= "s3://tipper-s3-[900994726592]/"
+csvlocation = save_location+'temp.folder'
+
+## @params: [JOB_NAME]
+args = getResolvedOptions(sys.argv, ['JOB_NAME'])
+
+glueContext = GlueContext(SparkContext.getOrCreate())
+spark_session = glueContext.spark_session
+sqlContext = SQLContext(spark_session.sparkContext, spark_session)
+job = Job(glueContext)
+
+
+job.init(args['JOB_NAME'], args)
+
+
+
+
+client = boto3.client('glue',region_name='ap-southeast-1')
+
+responseGetDatabases = client.get_databases()
+
+
+for databaseDict in databaseList:
+
+    databaseName = databaseDict['Name']
+    print('\ndatabaseName: ' + gluedatabase)
+
+    responseGetTables = client.get_tables( DatabaseName = gluedatabase )
+    tableList = responseGetTables['TableList']
+
+    for tableDict in tableList:
+
+         tableName = tableDict['Name']
+         print('\n-- tableName: '+tableName)
+         
+         for table in tableName:
+             datasource = glueContext.create_dynamic_frame.from_catalog(database = gluedatabase, table_name = table)
+             df = datasource.toDF().repartition(1)
+             df.repartition(1).write.csv(path=csvlocation, mode="append", header="true")
+
+
+job.comit()    
+
+
