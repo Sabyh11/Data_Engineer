@@ -22,9 +22,9 @@ sqlContext = SQLContext(spark)
 sc = SparkContext()
 
 #Parameters
-aws_region = "ap-southeast-1"
-gluedatabase = "rds-oracle-database"
-save_location= "s3://tipper-s3/"
+aws_region = "ap-southeast-2"
+gluedatabase = "PROJECT_SPARK"
+save_location= "s3:/PROJECT_SPARK/"
 csvlocation = save_location+'temp.folder'
 
 ## @params: [JOB_NAME]
