@@ -13,17 +13,23 @@ from pyspark.sql.functions import *
 
 
 spark = SparkSession.builder.getOrCreate()
+#spark.catalog.setCurrentDatabase('rds-oracle-database')
+
+glueContext = GlueContext(SparkContext.getOrCreate())
+#spark = glueContext.spark_session
+job = Job(glueContext)
 sqlContext = SQLContext(spark)
+sc = SparkContext()
 
 #Parameters
 aws_region = "ap-southeast-1"
 gluedatabase = "rds-oracle-database"
-save_location= "s3://PROJECT_SPARK/"
+save_location= "s3://tipper-s3/"
 csvlocation = save_location+'temp.folder'
 
 ## @params: [JOB_NAME]
 args = getResolvedOptions(sys.argv, ['JOB_NAME'])
-
+job = Job(glueContext)
 job.init(args['JOB_NAME'], args)
 
 db_name=[]
