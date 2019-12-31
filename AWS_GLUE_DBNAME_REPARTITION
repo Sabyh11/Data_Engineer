@@ -1,0 +1,43 @@
+import sys
+from awsglue.transforms import *
+from awsglue.utils import getResolvedOptions
+from pyspark.context import SparkContext
+from awsglue.context import *
+from awsglue.job import Job
+import boto3
+import pandas as pd
+from  pyspark.sql import SparkSession
+from pyspark.sql import *
+from pyspark.sql.functions import *
+
+
+
+sc = SparkContext()
+glueContext = GlueContext(sc)
+spark = glueContext.spark_session
+job = Job(glueContext)
+
+# @params: [JOB_NAME]
+args = getResolvedOptions(sys.argv, ['JOB_NAME'])
+
+
+
+#Parameters
+aws_region = "ap-southeast-1"
+gluedatabase = "rds-oracle-database"
+save_location= "s3://tipper-s3/"
+csvlocation = save_location+'temp.folder'
+
+job.init(args['JOB_NAME'], args)
+
+db_name=[]
+for row in spark.sql("Show databases").collect():
+    db_obj = row['databaseName']
+    db_name.append(db_obj)
+
+rdd = sc.parallelize(db_name)
+dblist = rdd.map(lambda x: Row(dbname=x[:]))
+dblist_df=spark.createDataFrame(dblist)
+dblist_df.repartition(1).write.csv(path=csvlocation, mode="overwrite", header="true")
+
+job.commit()
