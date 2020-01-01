@@ -12,13 +12,19 @@ from pyspark.sql import SQLContext
 from pyspark.sql.functions import *
 
 
-spark = SparkSession.builder.getOrCreate()
-#spark.catalog.setCurrentDatabase('rds-oracle-database')
-
-glueContext = GlueContext(SparkContext.getOrCreate())
-#spark = glueContext.spark_session
+sc = SparkContext()
+glueContext = GlueContext(sc)
+spark = glueContext.spark_session
 job = Job(glueContext)
-sqlContext = SQLContext(spark)
+
+
+# spark = SparkSession.builder.getOrCreate()
+# #spark.catalog.setCurrentDatabase('rds-oracle-database')
+
+# glueContext = GlueContext(SparkContext.getOrCreate())
+# #spark = glueContext.spark_session
+# job = Job(glueContext)
+# sqlContext = SQLContext(spark)
 
 savelocation= "s3://tipper-s3/"
 target_format = "csv"
@@ -34,7 +40,7 @@ job.init(args['JOB_NAME'], args)
 
 rds_db = "oracle_s3"
 db_name=[]
-for row in sqlContext.sql("Show databases").collect():
+for row in spark.sql("Show databases").collect():
     db_obj = row['databaseName']
     db_name.append(db_obj)
 
