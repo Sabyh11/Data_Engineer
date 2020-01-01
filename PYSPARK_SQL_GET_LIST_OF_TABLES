@@ -1,0 +1,66 @@
+
+import sys
+from awsglue.transforms import *
+from awsglue.utils import getResolvedOptions
+from pyspark.context import SparkContext
+from awsglue.context import *
+from awsglue.job import Job
+import boto3
+import pandas as pd
+from  pyspark.sql import SparkSession
+from pyspark.sql import SQLContext
+from pyspark.sql.functions import *
+
+
+spark = SparkSession.builder.getOrCreate()
+#spark.catalog.setCurrentDatabase('rds-oracle-database')
+
+glueContext = GlueContext(SparkContext.getOrCreate())
+#spark = glueContext.spark_session
+job = Job(glueContext)
+sqlContext = SQLContext(spark)
+
+savelocation= "s3://tipper-s3/"
+target_format = "csv"
+#csvlocation = save_location+'abc.folder'
+#DB_NAME = "rds-oracle-database"
+#outputFileName =  csvlocation + "/" + table
+
+## @params: [JOB_NAME]
+args = getResolvedOptions(sys.argv, ['JOB_NAME'])
+job = Job(glueContext)
+job.init(args['JOB_NAME'], args)
+
+
+rds_db = "admin"
+db_name=[]
+for row in sqlContext.sql("Show databases").collect():
+    db_obj = row['databaseName']
+    db_name.append(db_obj)
+
+db=[]
+for item in db_name:
+    if item.find(rds_db) != -1:
+        db.append(item)
+        
+# db_name=[]
+# for row in sqlContext.sql("Show tables").collect():
+#     db_name = row['database']
+
+# tablelist=''
+# for table_obj in spark.sql("show tables").collect():
+#     table=table_obj['tableName']
+#     tablelist += ('\n '+table+ ",")
+
+tablelist=[]
+for table_obj in spark.sql("show tables").collect():
+    tablelist.append(table_obj['tableName'])
+
+
+for object in tablelist:
+        datasource0 = glueContext.create_dynamic_frame.from_catalog(database = db, table_name = object, transformation_ctx = "datasource0")
+        datasink4 = glueContext.write_dynamic_frame.from_options(frame = datasource0, connection_type = "s3", connection_options = savelocation, format = "parquet", transformation_ctx = "datasink4")
+
+job.commit()
+    
+    
