@@ -1,0 +1,57 @@
+
+import sys
+from awsglue.transforms import *
+from awsglue.utils import getResolvedOptions
+from pyspark.context import SparkContext
+from awsglue.context import *
+from awsglue.job import Job
+import boto3
+import pandas as pd
+from  pyspark.sql import SparkSession
+from pyspark.sql import SQLContext
+from pyspark.sql.functions import *
+
+
+
+
+aws_region = "ap-southeast-1"
+gluedatabase = "rds-oracle-database"
+save_location= "s3://tipper-s3/"
+csvlocation = save_location+'temp.folder'
+
+
+sc = SparkContext()
+glueContext = GlueContext(sc)
+spark = glueContext.spark_session
+job = Job(glueContext)
+
+query = "(select table_name FROM USER_TABLES)"
+empDF = spark.read \
+.format("jdbc") \
+.option("url", "jdbc:oracle:thin:@--------------.amazonaws.com:1521/ORCL_A") \
+.option("dbtable", query) \
+.option("user", "---------") \
+.option("password", "-----------") \
+.option("driver", "oracle.jdbc.driver.OracleDriver") \
+.load()
+
+
+
+table_name =[]
+for table_obj in empDF.select("TABLE_NAME").collect():
+    tablelist= table_obj[0]
+    table_name.append(tablelist)
+
+
+for table in table_name:
+    df = spark.read \
+    .format("jdbc") \
+    .option("url", "jdbc:oracle:thin:@----------------.rds.amazonaws.com:1521/ORCL_A") \
+    .option("dbtable", table) \
+    .option("user", "--------") \
+    .option("password", "----------") \
+    .option("driver", "oracle.jdbc.driver.OracleDriver") \
+    .load()
+    df.write.csv(path=csvlocation, mode="overwrite", header="true")
+    
+job.commit()
