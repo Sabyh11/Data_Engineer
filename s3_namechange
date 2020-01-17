@@ -1,0 +1,25 @@
+s3_client = boto3.client(service_name='s3', region_name='us-east-1')
+s3 = boto3.resource('s3')
+
+copy_key=[]
+copy_source=[]
+bucket_name = "tipper-s3"
+bucket = s3.Bucket(name=""+bucket_name+"")
+BUCKET_NAME = "tipper-s3"
+
+for obj in bucket.objects.filter():
+    list = (obj.key)
+    link =save_location+list
+    copy_source.append(link)
+    if list.endswith('.csv'):
+        foldername=list.split("/")[0]+"/"+"part-00" 
+        copy_key.append(foldername)
+        file_name=list.split("/")[-1] 
+
+for copy_key_obj in copy_key:
+    response = s3_client.list_objects(Bucket=BUCKET_NAME,Prefix = copy_key_obj )
+    name = response["Contents"][0]["Key"]
+    copy_source = {'Bucket': BUCKET_NAME, 'Key': name}
+    s3_client.copy(CopySource=copy_source, Bucket=BUCKET_NAME, Key=copy_key_obj.split("/")[0])
+    s3_client.delete_object(Bucket=BUCKET_NAME, Key=name)
+
