@@ -12,9 +12,9 @@ from pyspark.sql import SQLContext
 from pyspark.sql.functions import *
 import boto3
 
-aws_region = "ap-southeast-1"
-gluedatabase = "admin-mysql-databaseadmin"
-save_location= "s3://tipper-s3-[900994726592]/"
+aws_region = "------------"
+gluedatabase = ------------"
+save_location= "s3://t------------/"
 csvlocation = save_location+'temp.folder'
 
 ## @params: [JOB_NAME]
