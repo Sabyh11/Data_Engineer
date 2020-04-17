@@ -1,0 +1,32 @@
+from bs4 import BeautifulSoup
+from urllib.request import urlopen
+import pandas as pd
+import numpy as np
+import datetime
+import requests
+
+
+
+
+url = "https://www.bidv.com.vn/ServicesBIDV/InterestDetailServlet"
+
+
+headers = {
+        'Content-Type': 'application/json'
+    }
+response = requests.get(url, verify=False)
+json = response.content
+
+
+pd_a = pd.read_json(json)
+hcm_table_data = pd_a['hcm'][['visible', 'data']]
+df = pd.DataFrame(hcm_table_data[1])
+df['UPDATE_DATE'] = datetime.date.today()
+new_header = df.iloc[0]
+df = df[0:]
+df.columns='KY_HAN','JPY','EUR','USD','KY_HAN_EN','VND','UPDATE_DATE'
+
+df['PRIMARY_KEY'] = df['KY_HAN']+df['VND']+df['UPDATE_DATE'].astype(str)+'BIDV'
+df['VND'] = df.VND.apply(lambda x: f"{x[:x.find('.')+2]}%")
+df['BANK_NAME'] = 'BIDV'
+df.to_csv(r'/data/out/tables/LAI_SUAT_BIDV.csv', index = False,encoding='utf-8')
