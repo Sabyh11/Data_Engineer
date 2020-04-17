@@ -1,0 +1,22 @@
+from bs4 import BeautifulSoup
+from urllib.request import urlopen
+import pandas as pd
+import numpy as np
+import ssl
+import datetime
+ssl._create_default_https_context = ssl._create_unverified_context
+url="https://portal.vietcombank.com.vn/UserControls/TVPortal.TyGia/pListLaiSuat.aspx?CusstomType=1&BacrhID=7&InrateType=&isEn=False&numAfter=2"
+soup = BeautifulSoup(urlopen(url).read())
+rows =[]
+for tr in soup.findAll('table')[0].findAll('tr'):
+    print (tr)
+    rows.append([td.get_text(strip=True) for td in tr.select('th, td')])
+    df=pd.DataFrame((rows)[16:])
+
+df['UPDATE_DATE'] = datetime.date.today()
+new_header = df.iloc[0]
+df = df[0:]
+df.columns='KY_HAN','VND','EUR','USD','UPDATE_DATE'
+df['PRIMARY_KEY'] = df['KY_HAN']+df['VND']+df['UPDATE_DATE'].astype(str)+'VIETCOMBANK'
+df['BANK_NAME'] = 'VIETCOMBANK'
+df.to_csv(r'/data/out/tables/LAI_SUAT_VIETCOMBANK.csv', index = False,encoding='utf-8')
