@@ -1,0 +1,32 @@
+from bs4 import BeautifulSoup
+from urllib.request import urlopen
+import pandas as pd
+import numpy as np
+import ssl
+import datetime
+
+#ssl._create_default_https_context = ssl._create_unverified_context
+
+
+url="https://www.vietinbank.vn/web/home/vn/lai-suat"
+soup = BeautifulSoup(urlopen(url).read())
+
+
+rows =[]
+for tr in soup.findAll('table')[0].findAll('tr'):
+    rows.append([td.get_text(strip=True) for td in tr.select('th, td')])
+ 
+content=pd.DataFrame((rows)[2:])
+df=content.iloc[:,0:4].copy()
+new_header = df.iloc[0]
+df = df[1:]
+df.columns='KY_HAN','VND','USD','EUR'
+df['UPDATE_DATE'] = datetime.date.today()
+df['PRIMARY_KEY'] = df['KY_HAN']+df['VND']+df['UPDATE_DATE'].astype(str)+'VIETINBANK'
+df['BANK_NAME'] = 'VIETINBANK'
+df['VND'] = df.VND.apply(lambda x: f"{x[:x.find(',')+2]}%")
+df['VND'] = df.VND.apply(lambda x: x.replace(',','.'))
+df['USD'] = df.USD.apply(lambda x: f"{x[:x.find(',')+2]}%")
+
+df['USD'] = df.USD.apply(lambda x: x.replace(',','.'))
+df.to_csv(r'/data/out/tables/LAI_SUAT_VIETINBANK.csv', index = False,encoding='utf-8')
