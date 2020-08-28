@@ -1,0 +1,18 @@
+#https://keboolamanagementapi.docs.apiary.io/#reference/projects/delete-user-from-project/delete-a-user-from-a-project# #library
+#url format : 'https://connection.keboola.com/manage/projects/project_id/users/user_id'
+import requests
+from urllib.parse import urlencode, quote_plus
+from urllib.request import urlopen
+
+URL = "https://connection.keboola.com/manage/projects/"+ str(project_id) + "/users/" + str(user_id)
+
+
+headers = {
+  'Content-Type': 'application/json',
+  'X-KBC-ManageApiToken': '------------------------'
+}
+resp = requests.get(URL, headers=headers)
+requests.get_method = lambda: 'DELETE'
+
+response_body = resp.content
+print(response_body)

@@ -1,0 +1,23 @@
+#urllib2 module has been split across several modules in Python 3 named
+#documentation https://keboolamanagementapi.docs.apiary.io/#reference/maintainers/maintainer-invitations/create-a-maintainer
+import requests
+import urllib.parse
+from urllib.request import urlopen
+url = "https://connection.keboola.com/manage/maintainers"
+TOKEN = " ----------------------------------------"
+
+
+values = """
+  {
+    "name": "Jane"
+  }
+"""
+
+headers = {
+  'Content-Type': 'application/json',
+  'X-KBC-ManageApiToken': TOKEN
+}
+req = urllib.request.Request(url, data=values, headers=headers)
+with urllib.request.urlopen(url) as resp:
+   data = resp.content
+   print(data)

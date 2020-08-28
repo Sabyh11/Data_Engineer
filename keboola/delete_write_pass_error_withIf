@@ -1,0 +1,61 @@
+#https://keboolamanagementapi.docs.apiary.io/#reference/projects/delete-user-from-project/delete-a-user-from-a-project# #library
+#library
+import json
+from urllib.parse import urlencode, quote_plus
+from urllib.request import urlopen
+import urllib.parse
+import urllib.request
+import pandas as pd
+import os
+import csv
+import time
+from datetime import datetime
+
+
+CONFIG_PATH = "in/tables/old_user_list.csv"
+df = pd.read_csv(CONFIG_PATH)
+
+#change value column to integrer
+df['project_id'] =  df['project_id'].astype('int32')
+df['user_id'] = df['user_id'].astype('int32')
+
+df.head()
+
+# Delete users (Production server) with Try and catch block
+
+headers = {
+  'Content-Type': 'application/json',
+  'X-KBC-ManageApiToken': '-----------------------------'
+}
+
+# Count of old and new users deleted
+new_deleted = 0
+old_deleted = 0
+
+
+if df.shape[0] > 0:
+    for row in range(len(df)):
+            project_id = df['project_id'][row]
+            user_id = df['user_id'][row]
+            URL = "https://connection.keboola.com/manage/projects/" + str(project_id) + "/users/" + str(user_id)
+            
+            try:
+                request = urllib.request.Request(URL, headers=headers)
+                request.get_method = lambda: 'DELETE'
+                response_body = urllib.request.urlopen(request).read()
+                print (response_body)
+            except:
+            
+                old_deleted += 1
+                df['delete_status'] = "old_deleted"
+                #print ('Raised HTTP 400 error because user was already removed') # Comment this to stop printing errors
+            else:
+                new_deleted += 1
+                df['delete_status'] = "new_deleted"
+                df['time_stamp'] = time.time()
+                print (f"No of new users deleted:{new_deleted}, No of previously deleted: {old_deleted}")
+
+    else: 
+        print ()
+        
+df.to_csv(r'/data/out/tables/delete_users.csv', index = False)

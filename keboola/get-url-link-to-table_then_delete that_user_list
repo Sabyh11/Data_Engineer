@@ -1,0 +1,42 @@
+#https://keboolamanagementapi.docs.apiary.io/#reference/projects/delete-user-from-project/delete-a-user-from-a-project# #library
+pip3 install lxml
+import json
+import requests
+from urllib.parse import urlencode, quote_plus
+from urllib.request import urlopen
+import pandas as pd
+import os
+import csv
+import html5lib
+
+CONFIG_PATH = "in/tables/old_user_list.csv"
+config = pd.read_csv(CONFIG_PATH)
+
+# import excel to data frame
+df = config
+
+# print first project_id and user_id
+print(f"First project_id: {df['project_id'][0]} and first user_id: {df['user_id'][0]}")
+
+for row in range(len(df)):
+    project_id = df['project_id'][row]
+    user_id = df['user_id'][row]
+
+URL = "https://connection.keboola.com/manage/projects/" + str(project_id) + "/users/" + str(user_id)
+
+#save deleting url to a file 
+deleted_list = pd.read_html(URL)
+
+deleted_list.to_csv (r'/data/out/tables/deleted_list.csv', index = False)
+
+--------------------------------------
+#system delete 
+headers = {
+  'Content-Type': 'application/json',
+  'X-KBC-ManageApiToken': '----------------------------'
+}
+resp = requests.get(URL, headers=headers)
+requests.get_method = lambda: 'DELETE'
+
+response_body = resp.content
+print(response_body)

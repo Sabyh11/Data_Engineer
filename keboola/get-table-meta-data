@@ -1,0 +1,28 @@
+import json
+import requests
+from urllib.parse import urlencode, quote_plus
+import pandas as pd
+import boto3
+
+#access
+TOKEN = '-------------------------------'
+TABLE_URL = 'https://connection.keboola.com/v2/storage/buckets/{}/tables/{}'
+
+
+
+headers = {
+  "Content-Type": "application/x-www-form-urlencoded",
+    "X-StorageApi-Token": TOKEN
+}
+
+#get table
+url=TABLE_URL.format('out.c-old-users','project_user')
+resp=requests.get(url, headers=headers)
+resp.json()
+
+#get table
+def get_table_list():
+    req=requests.get(TABLE_URL, headers=headers)
+    data = json.loads(resp.text)
+    return data
+
